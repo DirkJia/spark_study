@@ -1,0 +1,154 @@
+buildscript {
+    repositories {
+        maven { url "http://maven.zz.com/nexus/content/groups/public/" }
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+    }
+}
+
+plugins {
+    id 'org.hidetake.ssh' version '2.9.0'
+}
+
+repositories {
+    maven { url "http://maven.zz.com/nexus/content/groups/public/" }
+}
+
+apply plugin: "java"
+apply plugin: 'idea'
+apply plugin: 'application'
+apply plugin: "com.github.johnrengelman.shadow"
+
+mainClassName = 'com.weshare.ganglia.Application'
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+ext {
+    if (!project.hasProperty("env")) {
+        env = "prd"
+    }
+    boneVersion = env == "test" ?  '0.0.72-SNAPSHOT' :  '0.0.81-SNAPSHOT'
+    sparkVersion = '1.6.0'
+    scalaVersion = '2.10.5'
+}
+
+dependencies {
+    compile "com.weshare.sdk.bone:sdk-bone:$boneVersion"
+    //// Spark ////
+    compile "org.apache.spark:spark-core_2.10:$sparkVersion"
+    compile "org.apache.spark:spark-streaming_2.10:$sparkVersion"
+
+    //// Scala lib ////
+    compile "org.scala-lang:scala-library:$scalaVersion"
+    //javassist
+    compile 'org.javassist:javassist:3.22.0-GA'
+    compile 'com.weshare.sdk.alga:sdk-alga:0.2.05-SNAPSHOT'
+    compile 'org.apache.poi:poi-ooxml:3.17-beta1'
+}
+
+shadowJar {
+    zip64 true
+//    mergeServiceFiles()//打全量包需要取消此注释，并注释下面三行，也就是dependencies
+    dependencies {
+        include(dependency("com.weshare.sdk.bone:sdk-bone:$boneVersion"))
+    }
+}
+
+artifacts {
+    shadowJar
+}
+
+build.dependsOn(shadowJar)
+
+
+String HTableConstantFile = 'src/main/java/com/weshare/ganglia/constants/HTableConstant.java'
+String username= System.properties['user.name']
+
+task removeQa {
+    doLast {
+        ant.replace(file: HTableConstantFile, token: '_qa', value: '')
+    }
+}
+
+task addQa(dependsOn: removeQa) {
+    doLast {
+        ant.replaceregexp(file: HTableConstantFile, match: 'fk:(.*?)"', replace: 'fk:\\1_qa"', flags: 'g', byline: true)
+    }
+}
+
+ssh.settings {
+    dryRun = project.hasProperty('dryRun')
+    knownHosts = allowAnyHosts
+}
+
+remotes {
+    deployServer {
+        role 'webServers'
+        host = '20.1.1.93'
+        user = 'wangpeng'
+        //to be modified
+        identity = file('C:/documents/weshare/wangpeng')
+        passphrase = '2zhlmcL#'
+        timeoutSec = 600
+        keepAliveSec = 600
+    }
+}
+
+//for local test
+String gangliaLocalFile = 'src/main/resources/ganglia-local.properties'
+String ApplicationFile = 'src/main/java/com/weshare/ganglia/Application.java'
+task removeLocalTest(dependsOn: removeQa) {
+    doLast {
+        ant.replace(file: gangliaLocalFile, token: '_' + username, value: '')
+        ant.replace(file: ApplicationFile, token: 'localTest();removeLog();', value: '')
+    }
+}
+
+task addLocalTest(dependsOn: [removeLocalTest, addQa]) {
+    doLast {
+        ant.replace(file: gangliaLocalFile, token: 'local_test_topic', value: 'local_test_topic_' + username)
+        ant.replace(file: ApplicationFile, token: 'public static void main(String[] args) {', value: 'public static void main(String[] args) {localTest();removeLog();')
+    }
+}
+addQa.mustRunAfter removeLocalTest
+
+//to be modified
+String name = 'phl'
+task testUpload(dependsOn: [addLocalTest, shadowJar]) {
+    doLast {
+        ssh.run {
+            session(remotes.deployServer) {
+                def folder = 'ganglia-' + name
+                def path = '/data/homedata/workflow/qa/allInOne/' + folder
+                def jar = folder + '-' + new Date().format('MMddHH') + '-' + username + '.jar'
+                def pid = execute "ps aux | grep " + folder + " |grep -v grep| awk '{print \$2}'"
+                put from: 'build/libs/ganglia-all.jar', into: path + '/' + jar
+                if (pid?.trim()) {
+                    execute 'kill -9 ' + pid
+                }
+                println 'cd ' + path + '&& python start.py ' + jar
+                execute 'cd ' + path + '&& python start.py ' + jar
+            }
+        }
+    }
+}
+shadowJar.mustRunAfter addQa
+shadowJar.mustRunAfter removeLocalTest
+
+shadowJar.dependsOn(removeLocalTest)
