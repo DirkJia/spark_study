@@ -1,7 +1,6 @@
-buildscript {
+/*buildscript {
     repositories {
-        maven { url "http://maven.zz.com/nexus/content/groups/public/" }
-        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
     }
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
@@ -12,22 +11,25 @@ plugins {
     id 'org.hidetake.ssh' version '2.9.0'
 }
 
-repositories {
-    maven { url "http://maven.zz.com/nexus/content/groups/public/" }
-}
-
-apply plugin: "java"
-apply plugin: 'idea'
-apply plugin: 'application'
-apply plugin: "com.github.johnrengelman.shadow"
-
-mainClassName = 'com.weshare.ganglia.Application'
-
-[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
-
 task wrapper(type: Wrapper) {
     gradleVersion = '2.12'
 }
+*/
+
+
+
+apply plugin: "java"
+//apply plugin: 'idea'
+apply plugin: 'application'
+
+version='1.0'
+description='spark study'
+//apply plugin: "com.github.johnrengelman.shadow"
+
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+
 
 compileJava {
     sourceCompatibility = 1.8
@@ -39,17 +41,16 @@ compileTestJava {
     targetCompatibility = 1.8
 }
 
+repositories {
+    maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+}
+
 ext {
-    if (!project.hasProperty("env")) {
-        env = "prd"
-    }
-    boneVersion = env == "test" ?  '0.0.72-SNAPSHOT' :  '0.0.81-SNAPSHOT'
     sparkVersion = '1.6.0'
     scalaVersion = '2.10.5'
 }
 
 dependencies {
-    compile "com.weshare.sdk.bone:sdk-bone:$boneVersion"
     //// Spark ////
     compile "org.apache.spark:spark-core_2.10:$sparkVersion"
     compile "org.apache.spark:spark-streaming_2.10:$sparkVersion"
@@ -58,78 +59,118 @@ dependencies {
     compile "org.scala-lang:scala-library:$scalaVersion"
     //javassist
     compile 'org.javassist:javassist:3.22.0-GA'
-    compile 'com.weshare.sdk.alga:sdk-alga:0.2.05-SNAPSHOT'
     compile 'org.apache.poi:poi-ooxml:3.17-beta1'
+    //juint
+    compile 'junit:junit:4.12'
 }
 
-shadowJar {
-    zip64 true
-//    mergeServiceFiles()//打全量包需要取消此注释，并注释下面三行，也就是dependencies
-    dependencies {
-        include(dependency("com.weshare.sdk.bone:sdk-bone:$boneVersion"))
+jar{
+    from('src/main/java') {
+        exclude '*.properties'
+    }
+    manifest {
+        attributes(
+                'Implemention-Title': project.name,
+                'Implemention-Version': project.version,
+                'Implemention-Build': new Date(),
+                'Description': project.description
+        )
     }
 }
 
-artifacts {
-    shadowJar
+mainClassName = 'ApplicationMain'
+
+task doPackage(type: Tar) {
+    delete 'build/package'
+
+    destinationDir = file('build/package')
+    archiveName = "spark_study-install-runtime-$project.version-allsystem-"+String.format('%1$tY%1$tm%1$td',new Date()) + '.tar.gz'
+    baseName = "spark_study-install-$project.version"
+    compression=Compression.GZIP
+
+    from(project.libsDir) {
+        into(baseName + '/lib/')
+    }
+
+    from(configurations.runtime){
+        exclude('*.properties')
+        into(baseName + '/lib/')
+    }
+
+    from('bin'){
+        into(baseName + '/bin/')
+    }
+    from('conf'){
+        into(baseName + '/conf/')
+    }
+
 }
 
+doPackage.dependsOn(clean,jar)
+
+
+/*artifacts {
+    shadowJar
+}*/
+
+/*
 build.dependsOn(shadowJar)
 
 
 String HTableConstantFile = 'src/main/java/com/weshare/ganglia/constants/HTableConstant.java'
 String username= System.properties['user.name']
+*/
 
-task removeQa {
+/*task removeQa {
     doLast {
         ant.replace(file: HTableConstantFile, token: '_qa', value: '')
     }
-}
+}*/
 
-task addQa(dependsOn: removeQa) {
+/*task addQa(dependsOn: removeQa) {
     doLast {
         ant.replaceregexp(file: HTableConstantFile, match: 'fk:(.*?)"', replace: 'fk:\\1_qa"', flags: 'g', byline: true)
     }
-}
+}*/
 
-ssh.settings {
+/*ssh.settings {
     dryRun = project.hasProperty('dryRun')
     knownHosts = allowAnyHosts
-}
+}*/
 
-remotes {
+/*remotes {
     deployServer {
         role 'webServers'
-        host = '20.1.1.93'
-        user = 'wangpeng'
+        host = ''
+        user = ''
         //to be modified
-        identity = file('C:/documents/weshare/wangpeng')
+        identity = file('C:///')
         passphrase = '2zhlmcL#'
         timeoutSec = 600
         keepAliveSec = 600
     }
-}
+}*/
 
 //for local test
-String gangliaLocalFile = 'src/main/resources/ganglia-local.properties'
+/*String gangliaLocalFile = 'src/main/resources/ganglia-local.properties'
 String ApplicationFile = 'src/main/java/com/weshare/ganglia/Application.java'
 task removeLocalTest(dependsOn: removeQa) {
     doLast {
         ant.replace(file: gangliaLocalFile, token: '_' + username, value: '')
         ant.replace(file: ApplicationFile, token: 'localTest();removeLog();', value: '')
     }
-}
+}*/
 
-task addLocalTest(dependsOn: [removeLocalTest, addQa]) {
+/*task addLocalTest(dependsOn: [removeLocalTest, addQa]) {
     doLast {
         ant.replace(file: gangliaLocalFile, token: 'local_test_topic', value: 'local_test_topic_' + username)
         ant.replace(file: ApplicationFile, token: 'public static void main(String[] args) {', value: 'public static void main(String[] args) {localTest();removeLog();')
     }
 }
-addQa.mustRunAfter removeLocalTest
+addQa.mustRunAfter removeLocalTest*/
 
 //to be modified
-String name = 'phl'
+/*String name = 'phl'
 task testUpload(dependsOn: [addLocalTest, shadowJar]) {
     doLast {
         ssh.run {
@@ -151,4 +192,13 @@ task testUpload(dependsOn: [addLocalTest, shadowJar]) {
 shadowJar.mustRunAfter addQa
 shadowJar.mustRunAfter removeLocalTest
 
-shadowJar.dependsOn(removeLocalTest)
+shadowJar.dependsOn(removeLocalTest)*/
+
+/**
+ * 创建src目录
+ */
+/*task createDir(){
+    sourceSets*.java.srcDirs*.each{it.mkdirs()}
+    sourceSets*.resources.srcDirs*.each{it.mkdirs()}
+}*/
+
