@@ -7,7 +7,7 @@ VERSION=`cat ${BASE_DIR}/${releaseFileNAME} | grep Version | cut -d= -f2 | head 
 
 JAVA_EXE=java
 JAVA_OPT="-Xmx1024m -Xms256m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASE_DIR}/ -Djava.security.egd=file:///dev/urandom -Dname=tool"
-MAIN_CLASS=com.fiberhome.daml.coordinate.CoordinateSelectorShell
+MAIN_CLASS=ApplicationMain
 
 
 for f in ${BASE_DIR}/lib/*.jar;
