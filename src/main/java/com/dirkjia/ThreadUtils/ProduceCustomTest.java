@@ -1,4 +1,4 @@
-package com.fiberhome;
+package com.dirkjia.ThreadUtils;
 
 import java.util.Queue;
 import java.util.concurrent.Executors;
@@ -30,7 +30,7 @@ public class ProduceCustomTest {
         private Queue<String> queue ;
         int size ;
 
-        public Factory(LinkedBlockingQueue<String> queue,int size){
+        public Factory(LinkedBlockingQueue<String> queue, int size){
             this.queue=queue;
             this.size=size;
         }

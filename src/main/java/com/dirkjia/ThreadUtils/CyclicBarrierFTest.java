@@ -1,4 +1,4 @@
-package com.fiberhome;
+package com.dirkjia.ThreadUtils;
 
 
 import java.util.Random;
@@ -23,7 +23,7 @@ public class CyclicBarrierFTest {
         poolExecutor.shutdown();
     }
 
-    public static class MyRunner implements Runnable{
+    public static class MyRunner implements Runnable {
         private CyclicBarrier cyclicBarrier;
         public MyRunner(CyclicBarrier cyclicBarrier){
             this.cyclicBarrier=cyclicBarrier;

@@ -1,7 +1,4 @@
-package com.fiberhome;
-
-import scala.collection.immutable.Stream;
-import scala.tools.nsc.Global;
+package com.dirkjia.ThreadUtils;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -36,7 +33,7 @@ public class ReentrantLockTest {
         private Lock lock = new ReentrantLock();
         private Condition condition = lock.newCondition();
 
-        public Factory(Queue<String> queue,int size){
+        public Factory(Queue<String> queue, int size){
             this.queue=queue;
             this.size=size;
         }
@@ -83,7 +80,7 @@ public class ReentrantLockTest {
         }
     }
 
-    private static class Produce implements Runnable{
+    private static class Produce implements Runnable {
         private Factory factory;
         public Produce(Factory factory){
             this.factory=factory;
@@ -95,7 +92,7 @@ public class ReentrantLockTest {
         }
     }
 
-    private static class Consumer implements Runnable{
+    private static class Consumer implements Runnable {
         private Factory factory;
         public Consumer(Factory factory){
             this.factory = factory;

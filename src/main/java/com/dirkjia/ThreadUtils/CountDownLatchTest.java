@@ -1,4 +1,4 @@
-package com.fiberhome;
+package com.dirkjia.ThreadUtils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -18,7 +18,7 @@ public class CountDownLatchTest {
     }
 
 
-    public static class MyRunner implements Runnable{
+    public static class MyRunner implements Runnable {
         private CountDownLatch countDownLatch;
 
         public MyRunner(CountDownLatch countDownLatch){
@@ -37,7 +37,7 @@ public class CountDownLatchTest {
         }
     }
 
-    public static class LastRunner implements Runnable{
+    public static class LastRunner implements Runnable {
         private CountDownLatch countDownLatch;
         public LastRunner(CountDownLatch countDownLatch){
             this.countDownLatch = countDownLatch;
