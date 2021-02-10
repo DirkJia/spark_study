@@ -19,7 +19,7 @@ public class JavaSparkDemo {
         conf.setAppName("javasparkdemo").setMaster("local");
         JavaSparkContext jsc = new JavaSparkContext(conf);
 
-        JavaRDD<String> lines = jsc.textFile("data/testdata.txt");
+        JavaRDD<String> lines = jsc.textFile("data");
 
         JavaRDD initData = lines.flatMap(new FlatMapFunction<String,String>() {
             public Iterable<String> call(String s) throws Exception {
