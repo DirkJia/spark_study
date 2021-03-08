@@ -19,7 +19,7 @@ task wrapper(type: Wrapper) {
 
 
 apply plugin: "java"
-apply plugin: 'idea'
+//apply plugin: 'idea'
 apply plugin: 'application'
 
 version='1.0'
@@ -48,13 +48,17 @@ repositories {
 ext {
     sparkVersion = '1.6.0'
     scalaVersion = '2.10.5'
+    flinkVersion = '1.9.0'
 }
 
 dependencies {
     //// Spark ////
     compile "org.apache.spark:spark-core_2.11:$sparkVersion"
     compile "org.apache.spark:spark-streaming_2.11:$sparkVersion"
-
+    ///flink///
+    compile "org.apache.flink:flink-java:$flinkVersion"
+    compile "org.apache.flink:flink-streaming-java_2.11:$flinkVersion"
+    compile "org.apache.flink:flink-clients_2.11:$flinkVersion"
     //// Scala lib ////
     compile "org.scala-lang:scala-library:$scalaVersion"
     //javassist
