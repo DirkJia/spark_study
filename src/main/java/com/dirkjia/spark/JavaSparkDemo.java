@@ -14,12 +14,12 @@ import java.util.Arrays;
 
 public class JavaSparkDemo {
     public static void main(String[] args) {
-
+        System.setProperty("hadoop.home.dir","E:\\hsj\\mygit\\spark_study\\win");
         SparkConf conf = new SparkConf();
-        conf.setAppName("javasparkdemo").setMaster("local");
+        conf.setAppName("javasparkdemo").setMaster("local[2]");
         JavaSparkContext jsc = new JavaSparkContext(conf);
 
-        JavaRDD<String> lines = jsc.textFile("data");
+        JavaRDD<String> lines = jsc.textFile("data",2);
 
         JavaRDD initData = lines.flatMap(new FlatMapFunction<String,String>() {
             public Iterable<String> call(String s) throws Exception {
@@ -30,6 +30,7 @@ public class JavaSparkDemo {
         JavaPairRDD<String,Integer> mapdata = initData.mapToPair(new PairFunction<String,String,Integer>() {
 
             public Tuple2<String, Integer> call(String s) throws Exception {
+
                 return new Tuple2<String, Integer>(s,1);
             }
         });
@@ -40,7 +41,7 @@ public class JavaSparkDemo {
                 return integer + integer2;
             }
         });
-
+        reduceData.saveAsTextFile("data/out");
         reduceData.foreach(new VoidFunction<Tuple2<String, Integer>>() {
             public void call(Tuple2<String, Integer> stringIntegerTuple2) throws Exception {
                 System.out.println(stringIntegerTuple2._1 + "  "  + stringIntegerTuple2._2);
