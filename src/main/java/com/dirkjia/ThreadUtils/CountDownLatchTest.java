@@ -14,7 +14,6 @@ public class CountDownLatchTest {
         executor.submit(new MyRunner(countDownLatch));
         executor.submit(new MyRunner(countDownLatch));
         executor.shutdown();
-
     }
 
 
