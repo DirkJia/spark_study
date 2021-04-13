@@ -14,18 +14,20 @@ import java.util.Arrays;
 
 public class JavaSparkDemo {
     public static void main(String[] args) {
-        System.setProperty("hadoop.home.dir","E:\\hsj\\mygit\\spark_study\\win");
+        //System.setProperty("hadoop.home.dir","E:\\hsj\\mygit\\spark_study\\win");
         SparkConf conf = new SparkConf();
         conf.setAppName("javasparkdemo").setMaster("local[2]");
         JavaSparkContext jsc = new JavaSparkContext(conf);
 
         JavaRDD<String> lines = jsc.textFile("data",2);
 
-        JavaRDD initData = lines.flatMap(new FlatMapFunction<String,String>() {
+
+        JavaRDD<String> initData = lines.flatMap(new FlatMapFunction<String,String>() {
             public Iterable<String> call(String s) throws Exception {
                 return Arrays.asList(s.split("\t",-1));
             }
         });
+
 
         JavaPairRDD<String,Integer> mapdata = initData.mapToPair(new PairFunction<String,String,Integer>() {
 
@@ -35,6 +37,8 @@ public class JavaSparkDemo {
             }
         });
 
+        //自定义分区
+        //mapdata.partitionBy(new MyParitition(2)).saveAsTextFile("data/mypartition");
 
         JavaPairRDD<String,Integer> reduceData = mapdata.reduceByKey(new Function2<Integer, Integer, Integer>() {
             public Integer call(Integer integer, Integer integer2) throws Exception {

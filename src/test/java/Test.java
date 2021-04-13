@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class Test {
 
@@ -78,10 +75,29 @@ public class Test {
             result = Integer.MIN_VALUE;
         }
         //return (int) result;
-        Stack<String> a = new Stack<>();
-        a.peek();
-        char c = '4';
-        int ddd = (int)(c-'0');
+
+
+    }
+
+    @org.junit.Test
+    public void test4(){
+StringBuilder stringBuilder;
+        Set<Integer> set = new TreeSet<>();
+        set.add(3);
+        set.add(5);
+        set.add(1);
+        set.add(3);
+        for(int i : set){
+            System.out.println(i);
+        }
+    }
+
+
+    @org.junit.Test
+    public void test5(){
+
+
+
     }
 
 }
