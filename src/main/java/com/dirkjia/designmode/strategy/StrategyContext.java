@@ -30,7 +30,6 @@ public class StrategyContext {
 
         strategyContext.choice(StrategyType.STRATEGYB);
         strategyContext.exec();
-
     }
 
 }
