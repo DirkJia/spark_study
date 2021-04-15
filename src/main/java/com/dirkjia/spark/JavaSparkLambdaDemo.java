@@ -18,7 +18,7 @@ public class JavaSparkLambdaDemo {
         JavaSparkContext jsc = new JavaSparkContext(sparkConf);
 
         JavaRDD<String> initData = jsc.textFile("data");
-        initData.flatMap(x->Arrays.asList(x.split("\t")))
+        initData.flatMap(x->Arrays.asList(x.split("\t")).iterator())
                 .filter(x->!x.equals("北京"))
                 .mapToPair(x->new Tuple2<>(x,1))
                 .reduceByKey((x,y)->x+y)

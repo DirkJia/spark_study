@@ -1,26 +1,24 @@
 package com.dirkjia.spark;
 
-import com.google.common.base.Optional;
-import org.apache.spark.JavaSparkListener;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.scheduler.SparkListener;
 import org.apache.spark.scheduler.SparkListenerJobEnd;
 import org.apache.spark.scheduler.SparkListenerJobStart;
-import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class JavaSparkRDDListenerDemo {
 
-    private static class MySparkListener extends JavaSparkListener {
+    private static class MySparkListener extends SparkListener {
         @Override
         public void onJobStart(SparkListenerJobStart jobStart) {
             super.onJobStart(jobStart);
@@ -52,8 +50,8 @@ public class JavaSparkRDDListenerDemo {
 
         JavaPairRDD<String, Integer> pairRDD = parallelize.flatMapToPair(new PairFlatMapFunction<String, String, Integer>() {
             @Override
-            public Iterable<Tuple2<String, Integer>> call(String s) throws Exception {
-                return Arrays.asList(new Tuple2<>(s, 1));
+            public Iterator<Tuple2<String, Integer>> call(String s) throws Exception {
+                return Arrays.asList(new Tuple2<>(s, 1)).iterator();
             }
         });
         JavaPairRDD<String, Integer> reduceByKeyRDD = pairRDD.reduceByKey(new Function2<Integer, Integer, Integer>() {
@@ -70,14 +68,14 @@ public class JavaSparkRDDListenerDemo {
         });
         JavaPairRDD<String, Integer> load1 = parallelize.flatMapToPair(new PairFlatMapFunction<String, String, Integer>() {
             @Override
-            public Iterable<Tuple2<String, Integer>> call(String s) throws Exception {
-                return Arrays.asList(new Tuple2<>(s, 1));
+            public Iterator<Tuple2<String, Integer>> call(String s) throws Exception {
+                return Arrays.asList(new Tuple2<>(s, 1)).iterator();
             }
         });
         JavaPairRDD<String, Integer> load2 = parallelize2.flatMapToPair(new PairFlatMapFunction<String, String, Integer>() {
             @Override
-            public Iterable<Tuple2<String, Integer>> call(String s) throws Exception {
-                return Arrays.asList(new Tuple2<>(s, 2));
+            public Iterator<Tuple2<String, Integer>> call(String s) throws Exception {
+                return Arrays.asList(new Tuple2<>(s, 2)).iterator();
             }
         });
         load2.aggregateByKey("", new Function2<String, Integer, String>() {

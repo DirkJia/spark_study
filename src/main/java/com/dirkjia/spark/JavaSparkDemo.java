@@ -11,10 +11,11 @@ import org.apache.spark.api.java.function.VoidFunction;
 import scala.Tuple2;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class JavaSparkDemo {
     public static void main(String[] args) {
-        //System.setProperty("hadoop.home.dir","E:\\hsj\\mygit\\spark_study\\win");
+        System.setProperty("hadoop.home.dir","E:\\hsj\\mygit\\spark_study\\win");
         SparkConf conf = new SparkConf();
         conf.setAppName("javasparkdemo").setMaster("local[2]");
         JavaSparkContext jsc = new JavaSparkContext(conf);
@@ -23,8 +24,8 @@ public class JavaSparkDemo {
 
 
         JavaRDD<String> initData = lines.flatMap(new FlatMapFunction<String,String>() {
-            public Iterable<String> call(String s) throws Exception {
-                return Arrays.asList(s.split("\t",-1));
+            public Iterator<String> call(String s) throws Exception {
+                return Arrays.asList(s.split("\t",-1)).iterator();
             }
         });
 

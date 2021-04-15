@@ -1,6 +1,6 @@
 package com.dirkjia.spark;
 
-import com.google.common.base.Optional;
+import org.apache.flink.api.common.time.Time;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.storage.StorageLevel;
@@ -11,23 +11,22 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import scala.Tuple2;
 
 import java.util.Arrays;
-import java.util.List;
 
-public class JavaSparkStream {
+public class JavaSparkStreaming {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         System.setProperty("hadoop.home.dir","E:\\hsj\\mygit\\spark_study\\win");
 
 
         SparkConf sparkConf = new SparkConf();
         sparkConf.setAppName("stream-test")
-                .setMaster("local[3]");
+                .setMaster("local[2]");
         JavaStreamingContext jsc = new JavaStreamingContext(sparkConf, Durations.seconds(3));
         JavaReceiverInputDStream<String> lines = jsc.socketTextStream("localhost",9999, StorageLevel.MEMORY_AND_DISK_SER());
 
         //jsc.checkpoint("temp");
 
-        JavaPairDStream<String, Integer> words = lines.flatMap(x -> Arrays.asList(x.split(",")))
+        JavaPairDStream<String, Integer> words = lines.flatMap(x -> Arrays.asList(x.split(",")).iterator())
                 .filter(x -> !x.equals("北京"))
                 .mapToPair(x -> new Tuple2<>(x, 1));
         //test1

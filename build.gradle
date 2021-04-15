@@ -43,12 +43,17 @@ compileTestJava {
 
 repositories {
     mavenLocal()
-    maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+    maven {
+        url "http://maven.aliyun.com/nexus/content/groups/public"
+    }
+    maven {
+        url 'https://maven.aliyun.com/repository/public/'
+    }
 }
 
 ext {
-    sparkVersion = '1.6.0'
-    scalaVersion = '2.10.5'
+    sparkVersion = '2.1.0'
+    scalaVersion = '2.11.0'
     flinkVersion = '1.9.0'
 }
 
@@ -56,6 +61,7 @@ dependencies {
     //// Spark ////
     compile "org.apache.spark:spark-core_2.11:$sparkVersion"
     compile "org.apache.spark:spark-streaming_2.11:$sparkVersion"
+    compile "org.apache.spark:spark-sql_2.11:$sparkVersion"
     ///flink///
     compile "org.apache.flink:flink-java:$flinkVersion"
     compile "org.apache.flink:flink-streaming-java_2.11:$flinkVersion"
