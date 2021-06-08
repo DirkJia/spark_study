@@ -1,14 +1,50 @@
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 public class Test {
 
+    public static void quickSort(int[]arr,int low,int high){
+        if (low < high) {
+            int middle = getMiddle(arr, low, high);
+            quickSort(arr, low, middle - 1);//递归左边
+            quickSort(arr, middle + 1, high);//递归右边
+        }
+    }
+    public static int getMiddle(int[] list, int low, int high) {
+        int tmp = list[low];
+        while (low < high) {
+            while (low < high && list[high] >= tmp) {//大于关键字的在右边
+                high--;
+            }
+            list[low] = list[high];//小于关键字则交换至左边
+            while (low < high && list[low] <= tmp) {//小于关键字的在左边
+                low++;
+            }
+            list[high] = list[low];//大于关键字则交换至左边
+        }
+        list[low] = tmp;
+        return low;
+    }
     @org.junit.Test
-    public void test1(){
+    public void test0(){
+        int[] data = new int[]{45,28,80,90,50,16,100,10};
+        quickSort(data,0,data.length-1);
+        System.out.println(data);
+    }
 
-        List<Integer> list = new ArrayList<>();
-        list.remove(1);
+    @org.junit.Test
+    public void test1() throws UnsupportedEncodingException {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(1);
+        stack.push(2);
+        System.out.println(stack.pop());
+        System.out.println(stack.size());
 
-        System.out.println(new Test().trap(new int[]{0,1,0,2,1,0,1,3,2,1,2,1}));
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(1);
+        queue.offer(2);
+        System.out.println(queue.poll());
+        System.out.println(queue.size());
     }
 
     public int trap(int[] height) {
